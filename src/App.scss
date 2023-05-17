@@ -1,0 +1,9 @@
+div.card {
+  border: none;
+  box-shadow: 0 2px 4px 0 rgba($color: #000000, $alpha: 1.0);
+  div.card-header {
+    background-color: transparent;
+    border-bottom: 0;
+    margin-bottom: 0;
+  }
+}
