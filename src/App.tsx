@@ -2,20 +2,22 @@ import logo from "./logo.svg";
 import "./App.scss";
 import { useState } from "react";
 import CustomComponent from "./shared/components/Custom";
-import { StatusPerkawinanModel } from "./shared/models";
+import { JenisKelamin, StatusPerkawinanModel } from "./shared/models";
 
 function App() {
   const [state, setState] = useState({
     name: "Arif",
     age: 21,
+    gender: 2,
     statusPerkawinanOptions: StatusPerkawinanModel.createList(),
+    jenisKelaminOptions: JenisKelamin.createList(),
   });
   const submitHandler = (e: any) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     console.log("Nama ", formData.get("name"));
     // const {dto} = Object.fromEntries(formData.entries())
-    const { maritalStatus, ...dto }: { [key: string]: any } =
+    const { maritalStatus, jenisKelamin, ...dto }: { [key: string]: any } =
       Object.fromEntries(formData.entries()) || {};
     console.log("dto ", dto);
     console.log("dto ", dto.marital);
@@ -27,7 +29,8 @@ function App() {
     dto.maritalStatus = StatusPerkawinanModel.getById(
       dto.marital ? +dto.marital : null
     );
-    console.log('dto ',dto)
+    dto.jenisKelamin = JenisKelamin.getById(dto.gender ? +dto.gender : null);
+    console.log("dto ", dto);
   };
 
   const onChangeHandler = (e: any) => {
@@ -97,11 +100,7 @@ function App() {
               <label className="mb-1" htmlFor="marital">
                 Status Perkawinan
               </label>
-              <select
-                className="form-select"
-                name="marital"
-                placeholder="Masukan usia Anda"
-              >
+              <select className="form-select" name="marital">
                 <option value="">Pilih status Perkawinan</option>
                 {state.statusPerkawinanOptions.map((statusPerkawinan) => (
                   <option value={statusPerkawinan.id} key={statusPerkawinan.id}>
@@ -110,6 +109,39 @@ function App() {
                 ))}
               </select>
             </div>
+
+            <div className="mb-3">
+              <label className="mb-1" htmlFor="gender">
+                Jenis Kelamin
+              </label>
+              <div className="form-check">
+                {state.jenisKelaminOptions.map((jenisKelamin) => (
+                  <div className="form-check" key={jenisKelamin.id}>
+                    <input
+                      type="radio"
+                      className="form-check-input"
+                      name="gender"
+                      id={"gender" + jenisKelamin.id}
+                      value={jenisKelamin.id}
+                      checked={jenisKelamin.id === state.gender}
+                      onChange={(e) =>
+                        setState((state) => ({
+                          ...state,
+                          gender: +e.target.value,
+                        }))
+                      }
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor={"gender" + jenisKelamin.id}
+                    >
+                      {jenisKelamin.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <button className="btn btn-primary">
               <em className="fas fa-plus"></em>Add
             </button>
