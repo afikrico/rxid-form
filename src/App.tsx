@@ -2,7 +2,12 @@ import logo from "./logo.svg";
 import "./App.scss";
 import { useState } from "react";
 import CustomComponent from "./shared/components/Custom";
-import { JenisKelamin, StatusPerkawinanModel } from "./shared/models";
+import {
+  CheckboxModel,
+  HobiModel,
+  JenisKelamin,
+  StatusPerkawinanModel,
+} from "./shared/models";
 
 function App() {
   const [state, setState] = useState({
@@ -11,6 +16,7 @@ function App() {
     gender: 2,
     statusPerkawinanOptions: StatusPerkawinanModel.createList(),
     jenisKelaminOptions: JenisKelamin.createList(),
+    hobiList: CheckboxModel.createList(HobiModel.createList())
   });
   const submitHandler = (e: any) => {
     e.preventDefault();
@@ -30,6 +36,8 @@ function App() {
       dto.marital ? +dto.marital : null
     );
     dto.jenisKelamin = JenisKelamin.getById(dto.gender ? +dto.gender : null);
+    // dto.hobi = CheckboxModel.getValues(state.hobiList).map(val => val.name)
+    dto.hobi = CheckboxModel.getValues(state.hobiList)
     console.log("dto ", dto);
   };
 
@@ -40,6 +48,9 @@ function App() {
     }));
     console.log(e.target.value);
   };
+
+  console.log('hobilist ',state.hobiList)
+  console.log('hobilist ', CheckboxModel.getValues(state.hobiList))
   return (
     <div className="container py-4">
       <h1 className="mb-0">React Form</h1>
@@ -140,6 +151,38 @@ function App() {
                   </div>
                 ))}
               </div>
+            </div>
+            <div className="mb-3">
+              <label className="mb-1" htmlFor="hobi">
+                Hobi
+              </label>
+              {state.hobiList.map((hobi, i) => (
+                <div className="form-check" key={hobi.option.id}>
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    name="hobi"
+                    id={"hobi" + hobi.option.id}
+                    value={hobi.option.id}
+                    onChange={(e) => {
+                      const hobiList = state.hobiList
+                      hobiList[i].isChecked = e.target.checked
+                      setState((state) => ({
+                        ...state,
+                        hobiList
+                      }));
+                      console.log(e.target.checked)
+
+                    }}
+                  />
+                  <label
+                    htmlFor={"hobi" + hobi.option.id}
+                    className="form-check-label"
+                  >
+                    {hobi.option.name}
+                  </label>
+                </div>
+              ))}
             </div>
 
             <button className="btn btn-primary">
