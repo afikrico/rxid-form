@@ -14,32 +14,43 @@ function App() {
   const [state, setState] = useState({
     record: {
       name: "",
-      age: '',
-      gender: 0,
       dob: "",
+      age: "",
       address: "",
-      marital: '',
+      marital: 0,
+      gender: 0,
     },
     statusPerkawinanOptions: StatusPerkawinanModel.createList(),
     jenisKelaminOptions: JenisKelamin.createList(),
-    hobiList: CheckboxModel.createList(HobiModel.createList(), (option: HobiModel) => {
-      const isChecked = HobiModel.createList().slice(0,2).findIndex(item => item.id === option.id) !== -1
-      return isChecked
-    }),
+    hobiList: CheckboxModel.createList(
+      HobiModel.createList(),
+      (option: HobiModel) => {
+        const isChecked =
+          HobiModel.createList()
+            .slice(0, 2)
+            .findIndex((item) => item.id === option.id) !== -1;
+        return isChecked;
+      }
+    ),
   });
 
   useEffect(() => {
     setTimeout(() => {
-      const record= {
-        name: "Arif",
-        age: 31,
+      const {hobi, ...record} = {
+        name: "Arif CO",
+        age: "31",
         gender: 2,
-        dob: "1990-3-30",
+        dob: "1990-03-30",
         address: "jalan Cilebut Raya",
         marital: 2,
-        hobi: HobiModel.createList().slice(3, 4),
-      }
-    })
+        hobi: HobiModel.createList().slice(3, 4)
+      };
+      console.log("record from api", record);
+      setState((state) => ({
+        ...state,
+        record
+      }))
+    }, 2000);
     console.log("record ", state);
   }, []);
 
