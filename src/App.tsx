@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.scss";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CustomComponent from "./shared/components/Custom";
 import {
   CheckboxModel,
@@ -12,13 +12,37 @@ import { Components } from "./shared/components";
 
 function App() {
   const [state, setState] = useState({
-    name: "Arif",
-    age: 21,
-    gender: 2,
+    record: {
+      name: "",
+      age: '',
+      gender: 0,
+      dob: "",
+      address: "",
+      marital: '',
+    },
     statusPerkawinanOptions: StatusPerkawinanModel.createList(),
     jenisKelaminOptions: JenisKelamin.createList(),
-    hobiList: CheckboxModel.createList(HobiModel.createList()),
+    hobiList: CheckboxModel.createList(HobiModel.createList(), (option: HobiModel) => {
+      const isChecked = HobiModel.createList().slice(0,2).findIndex(item => item.id === option.id) !== -1
+      return isChecked
+    }),
   });
+
+  useEffect(() => {
+    setTimeout(() => {
+      const record= {
+        name: "Arif",
+        age: 31,
+        gender: 2,
+        dob: "1990-3-30",
+        address: "jalan Cilebut Raya",
+        marital: 2,
+        hobi: HobiModel.createList().slice(3, 4),
+      }
+    })
+    console.log("record ", state);
+  }, []);
+
   const submitHandler = (e: any) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -62,11 +86,20 @@ function App() {
           <Components.Form.Group label="Nama" htmlFor="name" required={true}>
             <input
               type="text"
-              value={state.name}
+              defaultValue={state.record.name}
               onChange={onChangeHandler}
               name="name"
               className="form-control"
               placeholder="Masukkan nama Anda"
+            />
+          </Components.Form.Group>
+          <Components.Form.Group label="Usia" htmlFor="age" required={true}>
+            <input
+              type="number"
+              defaultValue={state.record.age}
+              name="age"
+              className="form-control"
+              placeholder="Masukkan usia Anda"
             />
           </Components.Form.Group>
 
@@ -76,6 +109,7 @@ function App() {
               className="form-control"
               name="dob"
               placeholder="Pilih tanggal lahir Anda"
+              defaultValue={state.record.dob}
             />
           </Components.Form.Group>
 
@@ -84,11 +118,16 @@ function App() {
               name="address"
               className="form-control"
               placeholder="Masukkan alamat Anda"
+              defaultValue={state.record.address}
             />
           </Components.Form.Group>
 
           <Components.Form.Group label="Status Perkawinan" htmlFor="marital">
-            <select className="form-select" name="marital">
+            <select
+              className="form-select"
+              name="marital"
+              defaultValue={state.record.marital}
+            >
               <option value="">Pilih status Perkawinan</option>
               {state.statusPerkawinanOptions.map((statusPerkawinan) => (
                 <option value={statusPerkawinan.id} key={statusPerkawinan.id}>
@@ -107,7 +146,7 @@ function App() {
                   name="gender"
                   id={"gender" + jenisKelamin.id}
                   value={jenisKelamin.id}
-                  checked={jenisKelamin.id === state.gender}
+                  checked={jenisKelamin.id === state.record.gender}
                   onChange={(e) =>
                     setState((state) => ({
                       ...state,
@@ -134,6 +173,7 @@ function App() {
                   name="hobi"
                   id={"hobi" + hobi.option.id}
                   value={hobi.option.id}
+                  checked={hobi.isChecked}
                   onChange={(e) => {
                     const hobiList = state.hobiList;
                     hobiList[i].isChecked = e.target.checked;
