@@ -7,3 +7,14 @@ div.card {
     margin-bottom: 0;
   }
 }
+
+div.custom-form-group > label {
+  &.required {
+    &::after {
+      content: "*";
+      color: red;
+      margin-left: 0.1em;
+    }
+  }
+  color: orange
+}
