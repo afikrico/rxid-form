@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.scss";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CustomComponent from "./shared/components/Custom";
 import {
   CheckboxModel,
@@ -10,16 +10,9 @@ import {
 } from "./shared/models";
 import { Components } from "./shared/components";
 
+
 function App() {
   const [state, setState] = useState({
-    record: {
-      name: "",
-      dob: "",
-      age: "",
-      address: "",
-      marital: 0,
-      gender: 0,
-    },
     statusPerkawinanOptions: StatusPerkawinanModel.createList(),
     jenisKelaminOptions: JenisKelamin.createList(),
     hobiList: CheckboxModel.createList(
@@ -33,6 +26,17 @@ function App() {
       }
     ),
   });
+  const [record, setRecord] = useState<{[key:string]:any}>({
+    name: "",
+    dob: "",
+    age: "",
+    address: "",
+    marital: 0,
+    gender: 0,
+    termAndCondition: true
+  })
+
+  const maritalStatusRef = useRef<HTMLSelectElement>(null)
 
   useEffect(() => {
     setTimeout(() => {
@@ -45,48 +49,75 @@ function App() {
         marital: 2,
         hobi: HobiModel.createList().slice(3, 4)
       };
-      console.log("record from api", record);
+      const hobiList = state.hobiList.map((item) => {
+        item.isChecked = hobi.findIndex((data) => data.id === item.option.id) !== -1;
+        return item
+      })
       setState((state) => ({
         ...state,
-        record
+        hobiList
       }))
+      // console.log("record from api", record);
+      // setState((state) => ({
+      //   ...state,
+      //   record
+      // }))
+      setRecord(record)
+
+      // const maritalStatusElement = document.getElementsByName("marital")[0] as HTMLSelectElement;
+      // maritalStatusElement.value = String(record.marital)
+      if(maritalStatusRef.current){
+        maritalStatusRef.current.value = String(record.marital)
+      }
     }, 2000);
-    console.log("record ", state);
+    // console.log("record ", state);
   }, []);
 
   const submitHandler = (e: any) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    console.log("Nama ", formData.get("name"));
-    // const {dto} = Object.fromEntries(formData.entries())
-    const { maritalStatus, jenisKelamin, ...dto }: { [key: string]: any } =
-      Object.fromEntries(formData.entries()) || {};
-    console.log("dto ", dto);
-    console.log("dto ", dto.marital);
+    console.log('state record ', record)
+    const { marital, gender, ...dto} = record
+    dto.gender = JenisKelamin.getById(+gender)
+    dto.marital = StatusPerkawinanModel.getById(+marital)
+    dto.hobbies = CheckboxModel.getValues(state.hobiList)
+    console.log("dto ",dto)
+    // const formData = new FormData(e.target);
+    // console.log("Nama ", formData.get("name"));
+    // // const {dto} = Object.fromEntries(formData.entries())
+    // const { maritalStatus, jenisKelamin, ...dto }: { [key: string]: any } =
+    //   Object.fromEntries(formData.entries()) || {};
+    // console.log("dto ", dto);
+    // console.log("dto ", dto.marital);
 
-    console.log(
-      StatusPerkawinanModel.getById(dto.marital ? +dto.marital : null)
-    );
+    // console.log(
+    //   StatusPerkawinanModel.getById(dto.marital ? +dto.marital : null)
+    // );
 
-    dto.maritalStatus = StatusPerkawinanModel.getById(
-      dto.marital ? +dto.marital : null
-    );
-    dto.jenisKelamin = JenisKelamin.getById(dto.gender ? +dto.gender : null);
-    // dto.hobi = CheckboxModel.getValues(state.hobiList).map(val => val.name)
-    dto.hobi = CheckboxModel.getValues(state.hobiList);
-    console.log("dto ", dto);
+    // dto.maritalStatus = StatusPerkawinanModel.getById(
+    //   dto.marital ? +dto.marital : null
+    // );
+    // dto.jenisKelamin = JenisKelamin.getById(dto.gender ? +dto.gender : null);
+    // // dto.hobi = CheckboxModel.getValues(state.hobiList).map(val => val.name)
+    // dto.hobi = CheckboxModel.getValues(state.hobiList);
+    // console.log("dto ", dto);
   };
 
   const onChangeHandler = (e: any) => {
-    setState((state) => ({
-      ...state,
-      name: e.target.value,
-    }));
-    console.log(e.target.value);
+    // setState((state) => ({
+    //   ...state,
+    //   name: e.target.value,
+    // }));
+    // console.log(e.target.value);
+    // record[e.target.name] = e.target.value;
+    setRecord((record) => ({
+      ...record,
+      [e.target.name]: e.target.value
+    }))
+    console.log('record ',record)
   };
 
-  console.log("hobilist ", state.hobiList);
-  console.log("hobilist ", CheckboxModel.getValues(state.hobiList));
+  // console.log("hobilist ", state.hobiList);
+  // console.log("hobilist ", CheckboxModel.getValues(state.hobiList));
   return (
     <div className="container py-4">
       <h1 className="mb-0">React Form</h1>
@@ -97,7 +128,7 @@ function App() {
           <Components.Form.Group label="Nama" htmlFor="name" required={true}>
             <input
               type="text"
-              defaultValue={state.record.name}
+              value={record.name}
               onChange={onChangeHandler}
               name="name"
               className="form-control"
@@ -107,7 +138,8 @@ function App() {
           <Components.Form.Group label="Usia" htmlFor="age" required={true}>
             <input
               type="number"
-              defaultValue={state.record.age}
+              value={record.age}
+              onChange={onChangeHandler}
               name="age"
               className="form-control"
               placeholder="Masukkan usia Anda"
@@ -120,7 +152,8 @@ function App() {
               className="form-control"
               name="dob"
               placeholder="Pilih tanggal lahir Anda"
-              defaultValue={state.record.dob}
+              value={record.dob}
+              onChange={onChangeHandler}
             />
           </Components.Form.Group>
 
@@ -129,7 +162,8 @@ function App() {
               name="address"
               className="form-control"
               placeholder="Masukkan alamat Anda"
-              defaultValue={state.record.address}
+              value={record.address}
+              onChange={onChangeHandler}
             />
           </Components.Form.Group>
 
@@ -137,7 +171,9 @@ function App() {
             <select
               className="form-select"
               name="marital"
-              defaultValue={state.record.marital}
+              value={record.marital}
+              onChange={onChangeHandler}
+              // ref={maritalStatusRef}
             >
               <option value="">Pilih status Perkawinan</option>
               {state.statusPerkawinanOptions.map((statusPerkawinan) => (
@@ -157,13 +193,14 @@ function App() {
                   name="gender"
                   id={"gender" + jenisKelamin.id}
                   value={jenisKelamin.id}
-                  checked={jenisKelamin.id === state.record.gender}
-                  onChange={(e) =>
-                    setState((state) => ({
-                      ...state,
-                      gender: +e.target.value,
-                    }))
-                  }
+                  checked={jenisKelamin.id === +record.gender}
+                  // onChange={(e) =>
+                  //   setState((state) => ({
+                  //     ...state,
+                  //     gender: +e.target.value,
+                  //   }))
+                  // }
+                  onChange={onChangeHandler}
                 />
                 <label
                   className="form-check-label"
@@ -185,7 +222,7 @@ function App() {
                   id={"hobi" + hobi.option.id}
                   value={hobi.option.id}
                   checked={hobi.isChecked}
-                  onChange={(e) => {
+                  onChange={(e) => { 
                     const hobiList = state.hobiList;
                     hobiList[i].isChecked = e.target.checked;
                     setState((state) => ({
@@ -203,6 +240,30 @@ function App() {
                 </label>
               </div>
             ))}
+          </Components.Form.Group>
+
+          <Components.Form.Group>
+              <div className="form-check">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  name="termAndCondition"
+                  id="termAndCondition"
+                  checked={!!record.termAndCondition}
+                  onChange={(e) => { 
+                    setRecord((record) => ({
+                      ...record,
+                      termAndCondition: e.target.checked,
+                    }));
+                  }}
+                />
+                <label
+                  htmlFor="termAndCondition"
+                  className="form-check-label"
+                >
+                  Term and condition
+                </label>
+              </div>
           </Components.Form.Group>
 
           <button className="btn btn-primary">
