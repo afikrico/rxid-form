@@ -1,0 +1,1 @@
+export type ValidatorError = null | { message:any}
